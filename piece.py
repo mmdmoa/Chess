@@ -1,4 +1,4 @@
-from common_imports import *
+from common_names import *
 
 class Piece:
     loaded = {}

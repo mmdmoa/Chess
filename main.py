@@ -1,4 +1,4 @@
-from common_imports import *
+from common_names import *
 from common_functions import *
 from common_resources import *
 
