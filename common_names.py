@@ -1,5 +1,6 @@
 import random
 import sys
+from typing import Optional
 
 import chess
 import pygame as pg

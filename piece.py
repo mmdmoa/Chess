@@ -11,5 +11,8 @@ class Piece:
 
         self.transformed_surface = self.raw_surface.copy()
 
-    def render( self,surface:Surface ):
+    def transform( self ):
+        ...
+
+    def render_at( self,surface:Surface ):
         ...
