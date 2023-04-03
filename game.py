@@ -14,8 +14,6 @@ class Game:
         elif s.x > s.y:
             x_scale = s.y / s.x
 
-        print(x_scale,y_scale)
-
         board_size = Pos(s.x*x_scale,s.y*y_scale)
         new_rect = FRect(0,0,board_size.x,board_size.y)
         new_rect.center = Holder.window.center
