@@ -1,3 +1,5 @@
+import chess
+
 from common_names import *
 from common_resources import *
 from sprite import Sprite
@@ -5,6 +7,8 @@ from sprite import Sprite
 class Board:
 
     def __init__(self,rect:FRect):
+
+        self.brain_board = chess.Board()
         self.rect = rect
         self.border_size = 10
         self.black_color = Colors.GRAY.lerp(Colors.GREEN,0.3).lerp(Colors.RED,0.1)
@@ -140,6 +144,12 @@ class Board:
 
         return rect
 
+    def is_legal( self,uci ):
+        return chess.Move.from_uci(uci) in self.brain_board.legal_moves
+
+    def move_piece( self,uci ):
+        self.brain_board.push(chess.Move.from_uci(uci))
+
     def update( self ):
         self.content_rect = self.get_content_rect()
 
@@ -157,21 +167,35 @@ class Board:
 
 
     def check_events( self ):
+        if event_holder.mouse_pressed_keys[2]:
+            self.selected = None
+            self.update_pieces()
+
         if event_holder.mouse_pressed_keys[0]:
             pre_selection = self.get_board_collisions()
-            if pre_selection is not None:
+            if pre_selection is not None and pre_selection != self.selected:
                 if self.selected is None:
                     if pre_selection in self.pieces:
                         self.selected = pre_selection
                 else:
-                    name = self.pieces[self.selected]
+                    uci_move = self.selected+pre_selection
 
-                    del(self.pieces[self.selected])
-                    if pre_selection in self.pieces:
-                        del(self.pieces[pre_selection])
+                    if self.is_legal(uci_move):
+                        self.move_piece(uci_move)
 
-                    self.selected = None
-                    self.pieces[pre_selection] = name
+                        name = self.pieces[self.selected]
+
+                        del (self.pieces[self.selected])
+                        if pre_selection in self.pieces :
+                            del (self.pieces[pre_selection])
+
+                        self.selected = None
+                        self.pieces[pre_selection] = name
+
+
+
+
+
 
                 self.update_pieces()
 
