@@ -21,5 +21,8 @@ class Game:
         self.board = Board(new_rect)
 
 
+    def check_events( self ):
+        self.board.check_events()
+
     def render( self,surface:Surface ):
         self.board.render(surface)

@@ -20,6 +20,7 @@ game = Game()
 
 while not event_holder.should_quit:
     Holder.window.surface.fill(Colors.GRAY)
+    game.check_events()
     game.render(Holder.window.surface)
 
     event_holder.get_events()
