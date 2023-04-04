@@ -6,9 +6,27 @@ from sprite import Sprite
 
 class Board:
 
+    fen_pieces_map = {
+        'r':'black_rook',
+        'n':'black_knight',
+        'b':'black_bishop',
+        'q':'black_queen',
+        'k':'black_king',
+        'p':'black_pawn',
+
+        'R':'white_rook',
+        'N':'white_knight',
+        'B':'white_bishop',
+        'Q':'white_queen',
+        'K':'white_king',
+        'P':'white_pawn',
+    }
+
     def __init__(self,rect:FRect):
 
-        self.brain_board = chess.Board()
+        self.brain = chess.Board()
+        self.load_board_by_fen()
+
         self.rect = rect
         self.border_size = 10
         self.black_color = Colors.GRAY.lerp(Colors.GREEN,0.3).lerp(Colors.RED,0.1)
@@ -30,6 +48,7 @@ class Board:
     def init( self ):
         self.init_board()
         self.init_pieces()
+
 
     def init_board( self ):
         size = self.content_rect.w,self.content_rect.h
@@ -77,49 +96,45 @@ class Board:
             sprites[piece].transform_by_scale(scale[0],scale[1])
 
 
-        self.pieces = {
-            "a1":"white_rook",
-            "b1":"white_knight",
-            "c1":"white_bishop",
-            "d1":"white_queen",
-            "e1":"white_king",
-            "f1":"white_bishop",
-            "g1":"white_knight",
-            "h1":"white_rook",
+        self.load_board_by_fen()
 
-            "a2" : "white_pawn",
-            "b2" : "white_pawn",
-            "c2" : "white_pawn",
-            "d2" : "white_pawn",
-            "e2" : "white_pawn",
-            "f2" : "white_pawn",
-            "g2" : "white_pawn",
-            "h2" : "white_pawn",
+        self.update_pieces_surface()
 
 
-            "a8" : "black_rook",
-            "b8" : "black_knight",
-            "c8" : "black_bishop",
-            "d8" : "black_queen",
-            "e8" : "black_king",
-            "f8" : "black_bishop",
-            "g8" : "black_knight",
-            "h8" : "black_rook",
+    @staticmethod
+    def expand_fen_row(row ):
+        text = ""
+        for i in row:
+            if i.isnumeric():
+                for c in range(int(i)):
+                    text+='0'
+            else:
+                text+=i
 
-            "a7" : "black_pawn",
-            "b7" : "black_pawn",
-            "c7" : "black_pawn",
-            "d7" : "black_pawn",
-            "e7" : "black_pawn",
-            "f7" : "black_pawn",
-            "g7" : "black_pawn",
-            "h7" : "black_pawn",
-        }
+        return text
 
-        self.update_pieces()
+    def load_board_by_fen( self ):
+        fen = self.brain.board_fen()
+
+        new_fen = [Board.expand_fen_row(i) for i in fen.split('/')]
+
+        pieces = {}
+
+        for row,digit in zip(new_fen,"87654321"):
+            for column,letter in zip(row,"abcdefgh"):
+                if column!='0':
+                    pieces[letter+digit] = Board.fen_pieces_map[column]
 
 
-    def update_pieces( self ):
+        self.pieces = pieces
+
+
+
+
+
+
+
+    def update_pieces_surface( self ):
         self.pieces_surface.fill(Colors.GLASS)
 
         if self.selected is not None:
@@ -145,10 +160,7 @@ class Board:
         return rect
 
     def is_legal( self,uci ):
-        return chess.Move.from_uci(uci) in self.brain_board.legal_moves
-
-    def move_piece( self,uci ):
-        self.brain_board.push(chess.Move.from_uci(uci))
+        return chess.Move.from_uci(uci) in self.brain.legal_moves
 
     def update( self ):
         self.content_rect = self.get_content_rect()
@@ -169,35 +181,24 @@ class Board:
     def check_events( self ):
         if event_holder.mouse_pressed_keys[2]:
             self.selected = None
-            self.update_pieces()
+            self.update_pieces_surface()
 
         if event_holder.mouse_pressed_keys[0]:
             pre_selection = self.get_board_collisions()
             if pre_selection is not None and pre_selection != self.selected:
-                if self.selected is None:
+
+                if self.selected is None: # Selection
                     if pre_selection in self.pieces:
                         self.selected = pre_selection
-                else:
+                else: # Action
                     uci_move = self.selected+pre_selection
 
                     if self.is_legal(uci_move):
-                        self.move_piece(uci_move)
-
-                        name = self.pieces[self.selected]
-
-                        del (self.pieces[self.selected])
-                        if pre_selection in self.pieces :
-                            del (self.pieces[pre_selection])
-
                         self.selected = None
-                        self.pieces[pre_selection] = name
+                        self.brain.push_uci(uci_move)
+                        self.load_board_by_fen()
 
-
-
-
-
-
-                self.update_pieces()
+                self.update_pieces_surface()
 
 
     def render_board( self,surface:Surface ):
