@@ -16,6 +16,9 @@ class Board:
         self.pieces = {}
         self.board_surface: Optional[Surface] = None
         self.pieces_surface: Optional[Surface] = None
+        self.selected = None
+        self.selected_color = Colors.BLUE.lerp(Colors.GREEN,0.3)
+        self.selected_color.a = 100
 
         self.update()
         self.init()
@@ -109,6 +112,15 @@ class Board:
             "h7" : "black_pawn",
         }
 
+        self.update_pieces()
+
+
+    def update_pieces( self ):
+        self.pieces_surface.fill(Colors.GLASS)
+
+        if self.selected is not None:
+            pg.draw.rect(self.pieces_surface,self.selected_color,self.board_dict[self.selected])
+
         for coord in self.pieces:
             piece_name = self.pieces[coord]
             rect = self.board_dict[coord]
@@ -146,8 +158,23 @@ class Board:
 
     def check_events( self ):
         if event_holder.mouse_pressed_keys[0]:
-            selected = self.get_board_collisions()
-            print(selected)
+            pre_selection = self.get_board_collisions()
+            if pre_selection is not None:
+                if self.selected is None:
+                    if pre_selection in self.pieces:
+                        self.selected = pre_selection
+                else:
+                    name = self.pieces[self.selected]
+
+                    del(self.pieces[self.selected])
+                    if pre_selection in self.pieces:
+                        del(self.pieces[pre_selection])
+
+                    self.selected = None
+                    self.pieces[pre_selection] = name
+
+                self.update_pieces()
+
 
     def render_board( self,surface:Surface ):
         ...
