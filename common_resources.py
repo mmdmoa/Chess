@@ -1,7 +1,7 @@
 from common_names import *
 
 from window import Window
-from assets import pieces
+from assets import sprites
 from event_holder import EventHolder, event_holder
 
 

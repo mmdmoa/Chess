@@ -11,16 +11,17 @@ class Board:
         self.content_rect = self.rect.copy()
 
         self.board_dict = {}
+
+        self.pieces = {}
         self.board_surface: Optional[Surface] = None
-        self.surface: Optional[Surface] = None
-
-
+        self.pieces_surface: Optional[Surface] = None
 
         self.update()
         self.init()
 
     def init( self ):
         self.init_board()
+        self.init_pieces()
 
     def init_board( self ):
         size = self.content_rect.w,self.content_rect.h
@@ -43,6 +44,37 @@ class Board:
                 is_black = not is_black
             is_black = not is_black
 
+    def init_pieces( self ):
+        size = self.content_rect.w, self.content_rect.h
+        self.pieces_surface = Surface(size).convert_alpha()
+        self.pieces_surface.fill(Colors.GLASS)
+
+        w, h = self.content_rect.w / 8, self.content_rect.h / 8
+
+        for piece in sprites:
+            sprites[piece].transform(w,h)
+
+        self.pieces = {
+            "black_king":"e8",
+            "black_queen":"d8",
+            "black_rook":"a8",
+            "black_bishop":"c8",
+            "black_knight":"b8",
+            "black_pawn":"a7",
+
+            "white_king":"e1",
+            "white_queen":"d1",
+            "white_rook":"a1",
+            "white_bishop":"c1",
+            "white_knight":"b1",
+            "white_pawn":"a2"
+        }
+
+        for key in self.pieces:
+            coord = self.pieces[key]
+            rect = self.board_dict[coord]
+            surface = sprites[key].transformed_surface
+            self.pieces_surface.blit(surface,rect)
 
 
 
@@ -81,5 +113,6 @@ class Board:
 
     def render( self,surface:Surface ):
         surface.blit(self.board_surface,self.content_rect)
+        surface.blit(self.pieces_surface,self.content_rect)
 
         pg.draw.rect(surface,[50,0,0],self.rect,width=self.border_size)
