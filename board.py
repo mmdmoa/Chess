@@ -1,13 +1,14 @@
 from common_names import *
 from common_resources import *
+from sprite import Sprite
 
 class Board:
 
     def __init__(self,rect:FRect):
         self.rect = rect
         self.border_size = 10
-        self.black_color = Colors.BLACK
-        self.white_color = Colors.WHITE
+        self.black_color = Colors.GRAY.lerp(Colors.GREEN,0.3).lerp(Colors.RED,0.1)
+        self.white_color = Colors.WHITE.lerp(Colors.GREEN,0.1).lerp(Colors.RED,0.3)
         self.content_rect = self.rect.copy()
 
         self.board_dict = {}
@@ -51,30 +52,70 @@ class Board:
 
         w, h = self.content_rect.w / 8, self.content_rect.h / 8
 
+        tallest_piece = sprites['black_queen']
+        max_y = 0
+        for key in sprites:
+            surface = sprites[key].raw_surface
+            if surface.get_height() > max_y:
+                max_y = surface.get_height()
+                tallest_piece = sprites[key]
+
+        tallest_piece.transform_by_height(h*0.95)
+        raw_size = tallest_piece.raw_surface.get_size()
+        transize = tallest_piece.transformed_surface.get_size()
+
+        scale = (transize[0] / raw_size[0],transize[1] / raw_size[1])
+
         for piece in sprites:
-            sprites[piece].transform(w,h)
+            sprites[piece].transform_by_scale(scale[0],scale[1])
+
 
         self.pieces = {
-            "black_king":"e8",
-            "black_queen":"d8",
-            "black_rook":"a8",
-            "black_bishop":"c8",
-            "black_knight":"b8",
-            "black_pawn":"a7",
+            "a1":"white_rook",
+            "b1":"white_knight",
+            "c1":"white_bishop",
+            "d1":"white_queen",
+            "e1":"white_king",
+            "f1":"white_bishop",
+            "g1":"white_knight",
+            "h1":"white_rook",
 
-            "white_king":"e1",
-            "white_queen":"d1",
-            "white_rook":"a1",
-            "white_bishop":"c1",
-            "white_knight":"b1",
-            "white_pawn":"a2"
+            "a2" : "white_pawn",
+            "b2" : "white_pawn",
+            "c2" : "white_pawn",
+            "d2" : "white_pawn",
+            "e2" : "white_pawn",
+            "f2" : "white_pawn",
+            "g2" : "white_pawn",
+            "h2" : "white_pawn",
+
+
+            "a8" : "black_rook",
+            "b8" : "black_knight",
+            "c8" : "black_bishop",
+            "d8" : "black_queen",
+            "e8" : "black_king",
+            "f8" : "black_bishop",
+            "g8" : "black_knight",
+            "h8" : "black_rook",
+
+            "a7" : "black_pawn",
+            "b7" : "black_pawn",
+            "c7" : "black_pawn",
+            "d7" : "black_pawn",
+            "e7" : "black_pawn",
+            "f7" : "black_pawn",
+            "g7" : "black_pawn",
+            "h7" : "black_pawn",
         }
 
-        for key in self.pieces:
-            coord = self.pieces[key]
+        for coord in self.pieces:
+            piece_name = self.pieces[coord]
             rect = self.board_dict[coord]
-            surface = sprites[key].transformed_surface
-            self.pieces_surface.blit(surface,rect)
+            surface = sprites[piece_name].transformed_surface
+            surface_rect = surface.get_rect()
+            surface_rect.center = rect.center
+            self.pieces_surface.blit(surface,surface_rect)
 
 
 
