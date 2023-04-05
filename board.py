@@ -184,6 +184,14 @@ class Board :
             if piece == name:
                 return coord
 
+    def undo( self ):
+        try:
+            self.brain.pop()
+            self.update_board_by_fen()
+            self.update_pieces_surface()
+        except IndexError:
+            ...
+
     def move( self,uci ):
 
         # Check if move is a pawn promotion
@@ -238,6 +246,9 @@ class Board :
 
 
     def check_events( self ) :
+        if K_SPACE in event_holder.pressed_keys:
+            self.undo()
+
         if event_holder.mouse_pressed_keys[2] :
             self.selected = None
             self.update_pieces_surface()

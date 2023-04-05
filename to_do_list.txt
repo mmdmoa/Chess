@@ -12,8 +12,9 @@ add promotion support               -   In the process...
 
 add check piece highlight           -   Done
 improve pieces highlights           -   No
-add undo button                     -   No
+add undo button                     -   In the process...
 add white and black turn check      -   No
 
 add white and black text            -   No
 sort Board class methods            -   No
+add board rotation support          -   No
