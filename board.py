@@ -42,6 +42,8 @@ class Board :
         self.take_color = Colors.GRAY.lerp(Colors.RED,0.7)
         self.move_color.a = 155
         self.take_color.a = 155
+        self.check_color = Colors.RED.lerp(Colors.WHITE,0.5)
+        self.check_color.a = 255
         self.move_radius = self.content_rect.w / 8 * 0.125
 
         self.update_board_size()
@@ -121,6 +123,10 @@ class Board :
     def update_pieces_surface( self ) :
         self.pieces_surface.fill(Colors.GLASS)
 
+        checkers = self.get_checkers_coordination()
+
+
+
         if self.selected is not None :
             pg.draw.rect(self.pieces_surface, self.selected_color, self.board_dict[self.selected])
             for move in self.valid_moves:
@@ -134,6 +140,13 @@ class Board :
 
                 pg.draw.rect(self.pieces_surface, color, self.board_dict[move],
                     width=int(self.board_dict[move].w*0.05))
+
+        for checker in checkers:
+            color = self.check_color
+            pg.draw.rect(self.pieces_surface, color, self.board_dict[checker],
+                width=int(self.board_dict[checker].w * 0.1)
+            )
+
 
         for coord in self.pieces :
             piece_name = self.pieces[coord]
@@ -153,7 +166,6 @@ class Board :
         self.valid_moves = [i[2:] for i in all_moves if
             self.is_legal(i)]
 
-
     @staticmethod
     def expand_fen_row( row ) :
         text = ""
@@ -165,6 +177,12 @@ class Board :
                 text += i
 
         return text
+
+    def find_piece( self,name ):
+        for coord in self.pieces:
+            piece = self.pieces[coord]
+            if piece == name:
+                return coord
 
     def move( self,uci ):
 
@@ -250,3 +268,25 @@ class Board :
         surface.blit(self.pieces_surface, self.content_rect)
 
         pg.draw.rect(surface, [50, 0, 0], self.rect, width=self.border_size)
+
+
+    def get_turn( self ):
+        if self.brain.turn:
+            return 'white'
+        return 'black'
+
+    def get_checkers_coordination( self ):
+        if not self.brain.is_check():
+            return []
+
+        checkers = str(self.brain.checkers()).split('\n')
+        checkers = [[c for c in i if c != ' '] for i in checkers]
+        result = []
+        for row,digit in zip(checkers,'87654321'):
+            for cell,letter in zip(row,'abcdefgh'):
+                if cell == '1':
+                    result.append(letter+digit)
+
+        result.append(self.find_piece(self.get_turn()+"_king"))
+
+        return result

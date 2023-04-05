@@ -4,12 +4,16 @@ add panel                           -   No
 add a settings menu in a panel      -   No
 add new game pane                   -   No
 prepare asset pack boards           -   No
+
 add boards from asset pack          -   No
 add win and lose text               -   No
 add claim draw support              -   No
 add promotion support               -   In the process...
-add check piece high-light          -   No
+
+add check piece highlight           -   Done
+improve pieces highlights           -   No
 add undo button                     -   No
 add white and black turn check      -   No
-add white and black text            -   No
 
+add white and black text            -   No
+sort Board class methods            -   No
