@@ -21,7 +21,7 @@ class Board :
 
     def __init__( self, rect: FRect ) :
         self.brain = chess.Board()
-        self.load_board_by_fen()
+        self.update_board_by_fen()
 
         self.rect = rect
         self.border_size = 10
@@ -44,11 +44,11 @@ class Board :
         self.take_color.a = 155
         self.move_radius = self.content_rect.w / 8 * 0.125
 
-        self.update()
+        self.update_board_size()
         self.init()
 
 
-    def update( self ) :
+    def update_board_size( self ) :
         self.content_rect = self.get_content_rect()
         self.move_radius = self.content_rect.w / 8 * 0.125
 
@@ -103,37 +103,19 @@ class Board :
         for piece in sprites :
             sprites[piece].transform_by_scale(scale[0], scale[1])
 
-        self.load_board_by_fen()
+        self.update_board_by_fen()
 
         self.update_pieces_surface()
 
 
-    @staticmethod
-    def expand_fen_row( row ) :
-        text = ""
-        for i in row :
-            if i.isnumeric() :
-                for c in range(int(i)) :
-                    text += '0'
-            else :
-                text += i
+    def get_content_rect( self ) :
+        rect = self.rect.copy()
+        rect.x += self.border_size
+        rect.w -= self.border_size * 2
+        rect.y += self.border_size
+        rect.h -= self.border_size * 2
 
-        return text
-
-
-    def load_board_by_fen( self ) :
-        fen = self.brain.board_fen()
-
-        new_fen = [Board.expand_fen_row(i) for i in fen.split('/')]
-
-        pieces = {}
-
-        for row, digit in zip(new_fen, "87654321") :
-            for column, letter in zip(row, "abcdefgh") :
-                if column != '0' :
-                    pieces[letter + digit] = Board.fen_pieces_map[column]
-
-        self.pieces = pieces
+        return rect
 
 
     def update_pieces_surface( self ) :
@@ -162,27 +144,67 @@ class Board :
             self.pieces_surface.blit(surface, surface_rect)
 
 
-    def get_content_rect( self ) :
-        rect = self.rect.copy()
-        rect.x += self.border_size
-        rect.w -= self.border_size * 2
-        rect.y += self.border_size
-        rect.h -= self.border_size * 2
-
-        return rect
-
-
-    def is_legal( self, uci ) :
-        return chess.Move.from_uci(uci) in self.brain.legal_moves
-
-
     def update_valid_moves( self ) :
         s = self.selected
         coord_board = Board.board_coordination_map.copy()
         coord_board.remove(s)
         all_moves = [s + i for i in coord_board]
+
         self.valid_moves = [i[2:] for i in all_moves if
-            chess.Move.from_uci(i) in self.brain.legal_moves]
+            self.is_legal(i)]
+
+
+    @staticmethod
+    def expand_fen_row( row ) :
+        text = ""
+        for i in row :
+            if i.isnumeric() :
+                for c in range(int(i)) :
+                    text += '0'
+            else :
+                text += i
+
+        return text
+
+    def move( self,uci ):
+
+        # Check if move is a pawn promotion
+        if self.is_promotion(uci):
+                uci+='q'
+
+        if self.is_legal(uci):
+            self.brain.push_uci(uci)
+            return True
+
+        return False
+
+    def update_board_by_fen( self ) :
+        fen = self.brain.board_fen()
+
+        new_fen = [Board.expand_fen_row(i) for i in fen.split('/')]
+
+        pieces = {}
+
+        for row, digit in zip(new_fen, "87654321") :
+            for column, letter in zip(row, "abcdefgh") :
+                if column != '0' :
+                    pieces[letter + digit] = Board.fen_pieces_map[column]
+
+        self.pieces = pieces
+
+    def is_promotion( self, uci ):
+        # Check if move is a pawn promotion
+        if self.pieces[uci[:2]].find('pawn') != -1 :
+            if uci[3 :] in ['1', '8'] :
+                return True
+
+        return False
+
+    def is_legal( self, uci ) :
+        if self.is_promotion(uci):
+            uci+='q'
+
+        return chess.Move.from_uci(uci) in self.brain.legal_moves
 
 
     def get_board_collisions( self ) -> str :
@@ -212,10 +234,9 @@ class Board :
                 else :  # Action
                     uci_move = self.selected + pre_selection
 
-                    if self.is_legal(uci_move) :
+                    if self.move(uci_move) :
                         self.selected = None
-                        self.brain.push_uci(uci_move)
-                        self.load_board_by_fen()
+                        self.update_board_by_fen()
 
                 self.update_pieces_surface()
 

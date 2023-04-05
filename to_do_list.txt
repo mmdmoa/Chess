@@ -7,7 +7,7 @@ prepare asset pack boards           -   No
 add boards from asset pack          -   No
 add win and lose text               -   No
 add claim draw support              -   No
-add promotion support               -   No
+add promotion support               -   In the process...
 add check piece high-light          -   No
 add undo button                     -   No
 add white and black turn check      -   No
