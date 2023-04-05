@@ -2,6 +2,7 @@ import chess
 
 from common_names import *
 from common_resources import *
+from common_functions import *
 from sprite import Sprite
 
 
@@ -24,7 +25,7 @@ class Board :
         self.update_board_by_fen()
 
         self.rect = rect
-        self.border_size = 10
+        self.border_size = 0
         self.black_color = Colors.GRAY.lerp(Colors.GREEN, 0.3).lerp(Colors.RED, 0.1)
         self.white_color = Colors.WHITE.lerp(Colors.GREEN, 0.1).lerp(Colors.RED, 0.3)
         self.content_rect = self.rect.copy()
@@ -73,7 +74,7 @@ class Board :
                 if is_black :
                     color = self.black_color
 
-                rect = FRect(x * w - 1, y * h - 1, w + 1, h + 1)
+                rect = FRect(x * w , y * h , w , h)
                 self.board_dict[letter + digit] = rect
                 pg.draw.rect(self.board_surface, color, rect)
 
@@ -122,6 +123,7 @@ class Board :
 
     def update_pieces_surface( self ) :
         self.pieces_surface.fill(Colors.GLASS)
+        # self.pieces_surface = self.board_surface.copy()
 
         checkers = self.get_checkers_coordination()
 
@@ -148,14 +150,22 @@ class Board :
             )
 
 
+        turn = self.get_turn()
+
         for coord in self.pieces :
             piece_name = self.pieces[coord]
             rect = self.board_dict[coord]
-            surface = sprites[piece_name].transformed_surface
+            surface: Surface = sprites[piece_name].transformed_surface.copy()
+            if turn == 'black':
+                surface = pg.transform.flip(surface,flip_x=False,flip_y=True)
+
             surface_rect = surface.get_rect()
             surface_rect.center = rect.center
             self.pieces_surface.blit(surface, surface_rect)
 
+        if turn == 'black':
+            # self.pieces_surface = pg.transform.flip(self.pieces_surface, flip_x=True, flip_y=True)
+            self.pieces_surface = pg.transform.flip(self.pieces_surface,True,True)
 
     def update_valid_moves( self ) :
         s = self.selected
@@ -185,6 +195,7 @@ class Board :
                 return coord
 
     def undo( self ):
+        self.selected = None
         try:
             self.brain.pop()
             self.update_board_by_fen()
@@ -196,7 +207,7 @@ class Board :
 
         # Check if move is a pawn promotion
         if self.is_promotion(uci):
-                uci+='q'
+            uci+='q'
 
         if self.is_legal(uci):
             self.brain.push_uci(uci)
@@ -236,6 +247,10 @@ class Board :
     def get_board_collisions( self ) -> str :
         if not event_holder.mouse_focus : 'none'
         m_rect = event_holder.mouse_rect
+
+        if self.get_turn() == 'black':
+            m_rect.center = rotate_points(self.rect.center,m_rect.center,180)
+
         m_rect.x -= self.content_rect.x
         m_rect.y -= self.content_rect.y
 
@@ -248,6 +263,9 @@ class Board :
     def check_events( self ) :
         if K_SPACE in event_holder.pressed_keys:
             self.undo()
+
+        if K_r in event_holder.pressed_keys:
+            self.pieces_surface = pg.transform.flip(self.pieces_surface,True,True)
 
         if event_holder.mouse_pressed_keys[2] :
             self.selected = None
@@ -270,21 +288,11 @@ class Board :
                 self.update_pieces_surface()
 
 
-    def render_board( self, surface: Surface ) :
-        ...
-
-
-    def render( self, surface: Surface ) :
-        surface.blit(self.board_surface, self.content_rect)
-        surface.blit(self.pieces_surface, self.content_rect)
-
-        pg.draw.rect(surface, [50, 0, 0], self.rect, width=self.border_size)
-
-
     def get_turn( self ):
         if self.brain.turn:
             return 'white'
         return 'black'
+
 
     def get_checkers_coordination( self ):
         if not self.brain.is_check():
@@ -301,3 +309,15 @@ class Board :
         result.append(self.find_piece(self.get_turn()+"_king"))
 
         return result
+
+
+    def render( self, surface: Surface ) :
+
+        surface.blit(self.board_surface,self.content_rect)
+
+        pieces_surface = self.pieces_surface
+
+        surface.blit(pieces_surface, self.content_rect)
+
+        if self.border_size:
+            pg.draw.rect(surface, [50, 0, 0], self.rect, width=self.border_size)

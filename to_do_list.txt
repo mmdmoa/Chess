@@ -17,4 +17,4 @@ add white and black turn check      -   No
 
 add white and black text            -   No
 sort Board class methods            -   No
-add board rotation support          -   No
+add board rotation support          -   Done

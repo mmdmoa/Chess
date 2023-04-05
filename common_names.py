@@ -1,5 +1,6 @@
 import random
 import sys
+import math
 from typing import Optional
 
 import chess
