@@ -3,6 +3,7 @@ import window
 from common_names import *
 from common_functions import *
 
+pg.init()
 from common_resources import *
 
 from window import Window
@@ -12,7 +13,7 @@ from game import Game
 size = 1000,640
 size_scale = 1
 
-pg.init()
+
 
 Holder.window = Window(Pos(size[0] * size_scale, size[1] * size_scale))
 

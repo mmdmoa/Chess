@@ -8,3 +8,8 @@ sprites_path = [(name, root + "chess_pieces/" + name + ".png") for name in
         "white_king", "white_queen", "white_rook", "white_bishop", "white_knight", "white_pawn"]]
 
 sprites = {key : value for key, value in [(name, Sprite(path)) for name, path in sprites_path]}
+
+
+fonts = [pg.font.SysFont("monospace",30)]
+
+fonts_path = ["./assets/fonts/english/FreeMonoBold.ttf"]
