@@ -20,7 +20,8 @@ class Board :
             board_coordination_map.append(letter + digit)
 
 
-    def __init__( self, rect: FRect ) :
+    def __init__( self, rect: FRect,caller ) :
+        self.caller = caller
         self.brain = chess.Board()
         self.update_board_by_fen()
 
@@ -204,7 +205,6 @@ class Board :
             ...
 
     def move( self,uci ):
-
         # Check if move is a pawn promotion
         if self.is_promotion(uci):
             uci+='q'
@@ -216,6 +216,7 @@ class Board :
         return False
 
     def update_board_by_fen( self ) :
+        self.caller.update_board_data()
         fen = self.brain.board_fen()
 
         new_fen = [Board.expand_fen_row(i) for i in fen.split('/')]
@@ -273,6 +274,13 @@ class Board :
 
         if event_holder.mouse_pressed_keys[0] :
             pre_selection = self.get_board_collisions()
+
+            if self.selected is not None:
+                uci_move = self.selected + pre_selection
+                if uci_move[2 :] in self.pieces :
+                    if self.pieces[uci_move[2 :]].find((self.get_turn())) != -1 :
+                        self.selected = None
+
             if pre_selection is not None and pre_selection != self.selected :
                 if self.selected is None :  # Selection
                     if pre_selection in self.pieces :
@@ -284,6 +292,7 @@ class Board :
                     if self.move(uci_move) :
                         self.selected = None
                         self.update_board_by_fen()
+
 
                 self.update_pieces_surface()
 

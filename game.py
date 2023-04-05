@@ -18,8 +18,10 @@ class Game:
         new_rect = FRect(0,0,board_size.x,board_size.y)
         new_rect.center = Holder.window.center
 
-        self.board = Board(new_rect)
+        self.board = Board(new_rect,self)
 
+    def update_board_data( self ):
+        ...
 
     def check_events( self ):
         self.board.check_events()
