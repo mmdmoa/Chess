@@ -198,6 +198,13 @@ class Board :
             if piece == name:
                 return coord
 
+    def reset( self ):
+        self.selected = None
+        self.moves_sequence.clear()
+        self.brain.reset()
+        self.update_board()
+        self.update_pieces_surface()
+
     def undo( self ):
         self.selected = None
         success = 0
@@ -280,10 +287,15 @@ class Board :
 
     def check_events( self ) :
 
+
+
         if K_r in event_holder.pressed_keys:
+            self.reset()
+
+        if K_v in event_holder.pressed_keys:
             self.reverse_board()
 
-        if K_SPACE in event_holder.pressed_keys:
+        if K_b in event_holder.pressed_keys:
             self.undo()
 
         if event_holder.mouse_pressed_keys[2] :
