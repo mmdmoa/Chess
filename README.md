@@ -3,7 +3,7 @@ A normal and simple chess game made with Pygame
 
 # Notation
 
-The project fails if you run it, you should download stockfish's binaries from it's site, according to your os and cpu,
+The project fails if you run it, you should download stockfish's binaries from https://stockfishchess.org, according to your os and cpu,
 and then replace the path of the AI in common_resources with it.
 it's messy but it works.
 
