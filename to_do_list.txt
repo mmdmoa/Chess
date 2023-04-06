@@ -6,7 +6,7 @@ add new game pane                   -   No
 prepare asset pack boards           -   No
 
 add boards from asset pack          -   No
-add win and lose text                   Done (Needs to be improved)
+add win and lose text                   No
 add claim draw support              -   No
 add promotion support               -   In the process...
 
@@ -15,9 +15,10 @@ improve pieces highlights           -   No
 add undo button                     -   In the process...
 add white and black turn check      -   No
 
-add white and black text            -   Done (Needs to be improved)
+add white and black text            -   No
 sort Board class methods            -   No
 add board rotation support          -   Done
 improve board and pieces rendering  -   No
 
 add selection cancel functionality  -   Done
+add simple chess engine             -   No
