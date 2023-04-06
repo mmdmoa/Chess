@@ -4,6 +4,7 @@ import math
 from typing import Optional
 
 import chess
+from stockfish import Stockfish
 import pygame as pg
 from pygame.locals import *
 from pygame.math import Vector2 as Pos
@@ -13,3 +14,4 @@ from pygame.surface import Surface
 from modules.mygame.drawables import TextBox
 
 from colors import Colors
+

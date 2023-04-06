@@ -22,9 +22,11 @@ class Board :
 
 
     def __init__( self, rect: FRect,caller ) :
+
+        self.moves_sequence:list[str] = []
         self.caller = caller
         self.brain = chess.Board()
-        self.update_board_by_fen()
+        self.update_board()
 
         self.rect = rect
         self.border_size = 0
@@ -110,7 +112,7 @@ class Board :
         for piece in sprites :
             sprites[piece].transform_by_scale(scale[0], scale[1])
 
-        self.update_board_by_fen()
+        self.update_board()
 
         self.update_pieces_surface()
 
@@ -200,10 +202,14 @@ class Board :
         self.selected = None
         try:
             self.brain.pop()
-            self.update_board_by_fen()
+            self.moves_sequence.pop(-1)
+            self.update_board()
             self.update_pieces_surface()
         except IndexError:
             ...
+
+    def ai_move( self ):
+        self.move(stockfish_engine.get_best_move())
 
     def move( self,uci ):
         # Check if move is a pawn promotion
@@ -212,11 +218,12 @@ class Board :
 
         if self.is_legal(uci):
             self.brain.push_uci(uci)
+            self.moves_sequence.append(uci)
             return True
 
         return False
 
-    def update_board_by_fen( self ) :
+    def update_board( self ) :
         self.caller.update_board_data()
         fen = self.brain.board_fen()
 
@@ -230,6 +237,7 @@ class Board :
                     pieces[letter + digit] = Board.fen_pieces_map[column]
 
         self.pieces = pieces
+        stockfish_engine.set_position(self.moves_sequence)
 
     def is_promotion( self, uci ):
         # Check if move is a pawn promotion
@@ -266,6 +274,7 @@ class Board :
         self.update_pieces_surface()
 
     def check_events( self ) :
+
         if K_r in event_holder.pressed_keys:
             self.reverse_board()
 
@@ -276,10 +285,14 @@ class Board :
             self.selected = None
             self.update_pieces_surface()
 
-        if event_holder.mouse_pressed_keys[0] :
+        if self.get_turn() == 'black':
+            self.ai_move()
+            self.update_board()
+            self.update_pieces_surface()
+        elif event_holder.mouse_pressed_keys[0] :
             pre_selection = self.get_board_collisions()
 
-            if self.selected is not None:
+            if self.selected is not None and pre_selection is not None:
                 uci_move = self.selected + pre_selection
                 if uci_move[2 :] in self.pieces :
                     if self.pieces[uci_move[2 :]].find((self.get_turn())) != -1 :
@@ -295,7 +308,7 @@ class Board :
 
                     if self.move(uci_move) :
                         self.selected = None
-                        self.update_board_by_fen()
+                        self.update_board()
 
 
                 self.update_pieces_surface()
