@@ -199,13 +199,11 @@ class Board :
             if piece == name:
                 return coord
 
-    def undo( self ):
+    def reset( self ):
         self.selected = None
         try:
-            copied_board = self.engine.board.copy()
-            copied_board.pop()
-            copied_board.pop()
-            self.update_board_by_fen(copied_board.board_fen())
+            self.engine.board.reset()
+            self.update_board_by_fen()
             self.update_pieces_surface()
 
         except IndexError:
@@ -282,7 +280,7 @@ class Board :
 
     def check_events( self ) :
 
-        if self.get_turn() == self.ai_turn:
+        if self.get_turn() == self.ai_turn and not self.engine.board.is_checkmate():
             self.make_ai_move()
             self.update_board_by_fen()
             self.update_pieces_surface()
@@ -291,7 +289,7 @@ class Board :
             self.reverse_board()
 
         if K_SPACE in event_holder.pressed_keys:
-            self.undo()
+            self.reset()
 
         if event_holder.mouse_pressed_keys[2] :
             self.selected = None
