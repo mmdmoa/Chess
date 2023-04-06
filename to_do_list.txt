@@ -22,3 +22,4 @@ improve board and pieces rendering  -   No
 
 add selection cancel functionality  -   Done
 add simple chess engine             -   No
+added stockfish to game             -   Done
