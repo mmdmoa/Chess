@@ -22,8 +22,10 @@ class Board :
 
 
     def __init__( self, rect: FRect,caller ) :
+        self.engine = engine.AIChess()
+        self.engine.minimaxDepth = 2
+        self.ai_turn = 'black'
         self.caller = caller
-        self.brain = chess.Board()
         self.update_board_by_fen()
 
         self.rect = rect
@@ -31,6 +33,7 @@ class Board :
         self.black_color = Colors.GRAY.lerp(Colors.GREEN, 0.3).lerp(Colors.RED, 0.1)
         self.white_color = Colors.WHITE.lerp(Colors.GREEN, 0.1).lerp(Colors.RED, 0.3)
         self.content_rect = self.rect.copy()
+
 
         self.board_dict = {}
         self.valid_moves = []
@@ -199,11 +202,19 @@ class Board :
     def undo( self ):
         self.selected = None
         try:
-            self.brain.pop()
-            self.update_board_by_fen()
+            copied_board = self.engine.board.copy()
+            copied_board.pop()
+            copied_board.pop()
+            self.update_board_by_fen(copied_board.board_fen())
             self.update_pieces_surface()
+
         except IndexError:
             ...
+
+
+    def make_ai_move( self ):
+        self.engine.makeChessMove(self.engine.chessAIMove()[0])
+
 
     def move( self,uci ):
         # Check if move is a pawn promotion
@@ -211,14 +222,16 @@ class Board :
             uci+='q'
 
         if self.is_legal(uci):
-            self.brain.push_uci(uci)
+            self.engine.board.push_uci(uci)
             return True
 
         return False
 
-    def update_board_by_fen( self ) :
+
+    def update_board_by_fen( self,fen=None ) :
         self.caller.update_board_data()
-        fen = self.brain.board_fen()
+        if fen is None:
+            fen = self.engine.board.board_fen()
 
         new_fen = [Board.expand_fen_row(i) for i in fen.split('/')]
 
@@ -230,6 +243,8 @@ class Board :
                     pieces[letter + digit] = Board.fen_pieces_map[column]
 
         self.pieces = pieces
+        self.engine.board.set_board_fen(fen)
+
 
     def is_promotion( self, uci ):
         # Check if move is a pawn promotion
@@ -243,7 +258,7 @@ class Board :
         if self.is_promotion(uci):
             uci+='q'
 
-        return chess.Move.from_uci(uci) in self.brain.legal_moves
+        return chess.Move.from_uci(uci) in self.engine.board.legal_moves
 
 
     def get_board_collisions( self ) -> str :
@@ -266,6 +281,12 @@ class Board :
         self.update_pieces_surface()
 
     def check_events( self ) :
+
+        if self.get_turn() == self.ai_turn:
+            self.make_ai_move()
+            self.update_board_by_fen()
+            self.update_pieces_surface()
+
         if K_r in event_holder.pressed_keys:
             self.reverse_board()
 
@@ -302,16 +323,16 @@ class Board :
 
 
     def get_turn( self ):
-        if self.brain.turn:
+        if self.engine.board.turn:
             return 'white'
         return 'black'
 
 
     def get_checkers_coordination( self ):
-        if not self.brain.is_check():
+        if not self.engine.board.is_check():
             return []
 
-        checkers = str(self.brain.checkers()).split('\n')
+        checkers = str(self.engine.board.checkers()).split('\n')
         checkers = [[c for c in i if c != ' '] for i in checkers]
         result = []
         for row,digit in zip(checkers,'87654321'):

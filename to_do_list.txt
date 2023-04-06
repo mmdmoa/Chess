@@ -12,7 +12,7 @@ add promotion support               -   In the process...
 
 add check piece highlight           -   Done
 improve pieces highlights           -   No
-add undo button                     -   In the process...
+add undo button                     -   In the process... , Broke backward compatibility
 add white and black turn check      -   No
 
 add white and black text            -   No
@@ -21,4 +21,5 @@ add board rotation support          -   Done
 improve board and pieces rendering  -   No
 
 add selection cancel functionality  -   Done
-add simple chess engine             -   No
+add simple chess engine             -   Yes
+replace engine with brain           -   Yes

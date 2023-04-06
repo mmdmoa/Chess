@@ -4,6 +4,7 @@ import math
 from typing import Optional
 
 import chess
+import AIchess as engine
 import pygame as pg
 from pygame.locals import *
 from pygame.math import Vector2 as Pos
