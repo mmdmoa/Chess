@@ -13,8 +13,14 @@ you need a pygame-ce above version 2.2
 
 ```commandline
 pip uninstall pygame
+```
+first remove pygame-de
+
+```commandline
 pip install pygame-ce
 ```
+
+then install pygame-ce and you should be good to go
 
 # Showcase
 https://user-images.githubusercontent.com/122750743/230415809-1ca43d09-8bdd-47cb-9eb8-3e26f814e797.mp4
