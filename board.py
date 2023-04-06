@@ -200,13 +200,18 @@ class Board :
 
     def undo( self ):
         self.selected = None
-        try:
-            self.brain.pop()
-            self.moves_sequence.pop(-1)
+        success = 0
+        for _ in range(2):
+            try:
+                self.brain.pop()
+                self.moves_sequence.pop(-1)
+                success = 1
+            except IndexError:
+                ...
+
+        if success:
             self.update_board()
             self.update_pieces_surface()
-        except IndexError:
-            ...
 
     def ai_move( self ):
         self.move(stockfish_engine.get_best_move())

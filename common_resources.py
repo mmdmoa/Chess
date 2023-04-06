@@ -9,8 +9,6 @@ stockfish_engine = Stockfish(path="/home/yolo/stockfish/stockfish_15.1_linux_x64
     parameters={"Threads" : 2, "Minimum Thinking Time" : 30}
 )
 
-
-
 class Holder:
     window: Optional[Window] = None
 
