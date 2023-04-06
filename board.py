@@ -1,4 +1,5 @@
 import chess
+import event_holder
 
 from common_names import *
 from common_resources import *
@@ -48,6 +49,8 @@ class Board :
         self.check_color.a = 255
         self.move_radius = self.content_rect.w / 8 * 0.125
 
+
+        self.is_reversed = False
         self.update_board_size()
         self.init()
 
@@ -151,20 +154,18 @@ class Board :
             )
 
 
-        turn = self.get_turn()
-
         for coord in self.pieces :
             piece_name = self.pieces[coord]
             rect = self.board_dict[coord]
             surface: Surface = sprites[piece_name].transformed_surface.copy()
-            if turn == 'black':
+            if self.is_reversed:
                 surface = pg.transform.flip(surface,flip_x=False,flip_y=True)
 
             surface_rect = surface.get_rect()
             surface_rect.center = rect.center
             self.pieces_surface.blit(surface, surface_rect)
 
-        if turn == 'black':
+        if self.is_reversed:
             # self.pieces_surface = pg.transform.flip(self.pieces_surface, flip_x=True, flip_y=True)
             self.pieces_surface = pg.transform.flip(self.pieces_surface,True,True)
 
@@ -249,7 +250,7 @@ class Board :
         if not event_holder.mouse_focus : 'none'
         m_rect = event_holder.mouse_rect
 
-        if self.get_turn() == 'black':
+        if self.is_reversed:
             m_rect.center = rotate_points(self.rect.center,m_rect.center,180)
 
         m_rect.x -= self.content_rect.x
@@ -260,13 +261,16 @@ class Board :
             if m_rect.colliderect(rect) :
                 return key
 
+    def reverse_board( self ):
+        self.is_reversed = not self.is_reversed
+        self.update_pieces_surface()
 
     def check_events( self ) :
+        if K_r in event_holder.pressed_keys:
+            self.reverse_board()
+
         if K_SPACE in event_holder.pressed_keys:
             self.undo()
-
-        if K_r in event_holder.pressed_keys:
-            self.pieces_surface = pg.transform.flip(self.pieces_surface,True,True)
 
         if event_holder.mouse_pressed_keys[2] :
             self.selected = None
